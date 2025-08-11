@@ -1,0 +1,27 @@
+
+workflows:
+  web-hosting:
+    name: Flutter Web → Firebase Hosting
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      vars:
+        PROJECT_ID: "fazenda-e01a7"
+        FIREBASE_TOKEN: ""
+    scripts:
+      - name: Flutter pub get
+        script: flutter pub get
+      - name: Build web
+        script: flutter build web --release
+      - name: Install Firebase CLI
+        script: npm i -g firebase-tools
+      - name: Deploy to Firebase Hosting
+        script: |
+          if [ -z "$PROJECT_ID" ] || [ -z "$FIREBASE_TOKEN" ]; then
+            echo "Defina PROJECT_ID e FIREBASE_TOKEN nas variáveis de ambiente do Codemagic."
+            exit 1
+          fi
+          firebase use $PROJECT_ID --token "$FIREBASE_TOKEN"
+          firebase deploy --only hosting --token "$FIREBASE_TOKEN"
+    artifacts:
+      - build/web
